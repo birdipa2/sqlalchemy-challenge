@@ -41,7 +41,7 @@ def home():
     """List all the available API Routes"""
     return (
         f"Welcome to the Hawaii Climate API!<br/>"
-        f"This API provides analysis for a period of one year between 23-08-2016 and 23-08-2017.<br/>"
+        f"This API provides analysis for a period of one year for dates from 2016-08-23 to 2017-08-23.<br/>"
         f"<br>Please note the following Available Routes:<br/>"
         f"(Direct links have also been provided where possible)<br/>"
         f"<br>/api/v1.0/precipitation<br/>"
@@ -51,7 +51,10 @@ def home():
         f"<br>/api/v1.0/tobs<br/>"
         f"""<a href = "http://127.0.0.1:5000/api/v1.0/tobs" > Temperature Observations </a> <br/>"""
         f"<br>/api/v1.0/&lt;start_date&gt;<br/>"
-        f"<br>/api/v1.0/&lt;start_date&gt;/&lt;end_date&gt;"
+        f"Please enter the date in the format yyyy-mm-dd<br/>"
+        f"<br>/api/v1.0/&lt;start_date&gt;/&lt;end_date&gt;<br/>"
+        f"Please enter the date in the format yyyy-mm-dd<br/><br>For Example: Min, Max, and Average temperatures for dates from 2016-08-23 to 2017-08-23 <br/>"
+        f"""<a href = "http://127.0.0.1:5000/api/v1.0/2016-08-23/2017-08-23" > Min, Max, and Average temperatures </a> <br/>"""
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -115,7 +118,13 @@ def start(start_date):
         .filter(Measurement.date >= start_date)\
             .all()
     # Convert the query results to a list
-    start_list = list(np.ravel(start_results))
+    start_list = []
+    for result in start_results:
+        start_dict = {}
+        start_dict['Minimum Temperature'] = result[0]
+        start_dict['Average Temperature'] = result[1]
+        start_dict['Maximum Temperature'] = result[2]
+        start_list.append(start_dict)
     return jsonify(start_list)
 
 @app.route("/api/v1.0/<start_date>/<end_date>")
@@ -125,9 +134,15 @@ def start_end(start_date, end_date):
         .filter(Measurement.date >= start_date)\
             .filter(Measurement.date <= end_date)\
                 .all()
-    # Convert the query results to a list
-    start_end_list = list(np.ravel(start_end_results))
-    return jsonify(start_end_list)
+    # Convert the query results to a list of dictionaries
+    start_list = []
+    for result in start_end_results:
+        start_dict = {}
+        start_dict['Minimum Temperature'] = result[0]
+        start_dict['Average Temperature'] = result[1]
+        start_dict['Maximum Temperature'] = result[2]
+        start_list.append(start_dict)
+    return jsonify(start_list)
 
 if __name__ == '__main__':
     app.run(debug=True)
